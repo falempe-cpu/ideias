@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil dos Candidatos — Pós-Graduação TCE-ES 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --azul:    #003366;
+    --azul-m:  #1A4D8C;
+    --azul-cl: #D6E4F0;
+    --verde:   #1A6B3A;
+    --verde-cl:#C6EFCE;
+    --cinza:   #F5F7FA;
+    --borda:   #D1D9E0;
+    --texto:   #1A2B3C;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--cinza); color: var(--texto); }
+
+  /* ── Header ── */
+  .topo {
+    background: var(--azul);
+    color: white;
+    padding: 0;
+  }
+  .topo-faixa {
+    background: var(--azul-m);
+    padding: 6px 32px;
+    font-size: 11px;
+    letter-spacing: .5px;
+    color: #AAC4E0;
+    text-transform: uppercase;
+  }
+  .topo-corpo {
+    padding: 20px 32px 18px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .topo-escudo {
+    width: 52px; height: 52px;
+    background: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .topo-titulo h1 { font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .topo-titulo p  { font-size: 12px; color: #AAC4E0; margin-top: 3px; }
+
+  /* ── Badges de resumo ── */
+  .resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    padding: 24px 32px;
+    background: white;
+    border-bottom: 1px solid var(--borda);
+  }
+  .badge {
+    background: var(--cinza);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .badge-num { font-size: 30px; font-weight: 700; color: var(--azul); line-height: 1; }
+  .badge-label { font-size: 11px; color: #607080; margin-top: 5px; text-transform: uppercase; letter-spacing: .4px; }
+  .badge.verde .badge-num { color: var(--verde); }
+  .badge.laranja .badge-num { color: #B45E00; }
+  .badge.roxo .badge-num { color: #5B2D8E; }
+
+  /* ── Layout principal ── */
+  .main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  /* ── Seções ── */
+  .secao {
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    overflow: hidden;
+  }
+  .secao-header {
+    background: var(--azul);
+    color: white;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .secao-header .icon { font-size: 16px; }
+  .secao-body { padding: 20px; }
+
+  /* ── Grid de gráficos ── */
+  .charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .charts-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .charts-2, .charts-3 { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--cinza);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .chart-card h3 { font-size: 12px; font-weight: 600; color: #445566; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .4px; }
+  .chart-container { position: relative; }
+
+  /* ── Tabela ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--azul); color: white; padding: 9px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--borda); }
+  tr:nth-child(even) td { background: var(--cinza); }
+  tr:hover td { background: var(--azul-cl); }
+  .num { text-align: right; font-weight: 600; }
+  .pct { text-align: right; color: #607080; }
+
+  /* ── Barra de progresso inline ── */
+  .barra-wrap { display: flex; align-items: center; gap: 8px; }
+  .barra { flex: 1; height: 8px; background: #E8EDF2; border-radius: 4px; overflow: hidden; }
+  .barra-fill { height: 100%; border-radius: 4px; background: var(--azul-m); }
+  .barra-fill.verde { background: var(--verde); }
+  .barra-fill.laranja { background: #C86A00; }
+
+  /* ── Rodapé ── */
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: #90A0B0;
+    padding: 20px;
+    margin-top: 10px;
+  }
+
+  /* ── Tag cota ── */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag-ac  { background: #DDEEFF; color: #003366; }
+  .tag-pcd { background: #FFF0CC; color: #8B5E00; }
+  .tag-neg { background: #E8F5E9; color: #1A5C2A; }
+</style>
+</head>
+<body>
+
+<!-- ── CABEÇALHO ── -->
+<div class="topo">
+  <div class="topo-faixa">Escola de Contas Públicas Mariazinha Velloso Lucas — ECP / TCE-ES</div>
+  <div class="topo-corpo">
+    <div class="topo-escudo">⚖️</div>
+    <div class="topo-titulo">
+      <h1>Perfil dos Candidatos Inscritos</h1>
+      <p>Processo Seletivo Simplificado Nº 00001/2026 · Pós-Graduação Lato Sensu em Gestão de Contas Públicas e Sustentabilidade Fiscal · Gerado em 30/03/2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── BADGES SUMÁRIO ── -->
+<div class="resumo-grid">
+  <div class="badge">
+    <div class="badge-num">702</div>
+    <div class="badge-label">Total de Inscritos</div>
+  </div>
+  <div class="badge">
+    <div class="badge-num">412</div>
+    <div class="badge-label">Feminino (58,7%)</div>
+  </div>
+  <div class="badge">
+    <div class="badge-num">290</div>
+    <div class="badge-label">Masculino (41,3%)</div>
+  </div>
+  <div class="badge verde">
+    <div class="badge-num">40,9</div>
+    <div class="badge-label">Idade média (anos)</div>
+  </div>
+  <div class="badge laranja">
+    <div class="badge-num">28,9</div>
+    <div class="badge-label">Pont. média total</div>
+  </div>
+  <div class="badge roxo">
+    <div class="badge-num">51,7%</div>
+    <div class="badge-label">Pós-graduados</div>
+  </div>
+</div>
+
+<!-- ── CONTEÚDO PRINCIPAL ── -->
+<div class="main">
+
+  <!-- 1. DISTRIBUIÇÃO POR COTA -->
+  <div class="secao">
+    <div class="secao-header"><span class="icon">🏷️</span> Distribuição por Modalidade de Cota</div>
+    <div class="secao-body">
+      <div class="charts-2">
+        <div class="chart-card">
+          <h3>Proporção de Inscritos por Cota</h3>
+          <div class="chart-container" style="height:240px">
+            <canvas id="chartCota"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Detalhamento das Cotas</h3>
+          <table>
+            <thead><tr><th>Modalidade</th><th class="num">Inscritos</th><th class="pct">%</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-ac">Ampla Concorrência</span></td><td class="num">570</td><td class="pct">81,2%</td></tr>
+              <tr><td><span class="tag tag-neg">Cota Racial</span></td><td class="num">115</td><td class="pct">16,4%</td></tr>
+              <tr><td><span class="tag tag-pcd">PCD</span></td><td class="num">14</td><td class="pct">2,0%</td></tr>
+              <tr><td><span class="tag tag-pcd" style="background:#F3E8FF;color:#5B2D8E">Racial + PCD</span></td><td class="num">3</td><td class="pct">0,4%</td></tr>
+              <tr style="background:#EFF4FA"><td><strong>Total</strong></td><td class="num"><strong>702</strong></td><td class="pct"><strong>100%</strong></td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#888;margin-top:10px">ℹ️ Candidatos podem constar simultaneamente em múltiplas cotas (racial e PCD).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PERFIL DEMOGRÁFICO -->
+  <div class="secao">
+    <div class="secao-header"><span class="icon">👥</span> Perfil Demográfico</div>
+    <div class="secao-body">
+      <div class="charts-3">
+        <div class="chart-card">
+          <h3>Distribuição por Sexo</h3>
+          <div class="chart-container" style="height:220px">
+            <canvas id="chartSexo"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Faixa Etária</h3>
+          <div class="chart-container" style="height:220px">
+            <canvas id="chartIdade"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Estado Civil</h3>
+          <div class="chart-container" style="height:220px">
+            <canvas id="chartEstCivil"></canvas>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="chart-card">
+          <h3>Top 15 Municípios de Origem</h3>
+          <div class="chart-container" style="height:280px">
+            <canvas id="chartCidades"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela completa de municípios -->
+      <div style="margin-top:20px">
+        <div class="chart-card">
+          <h3>Relação Completa de Municípios com Candidatos Inscritos — 92 municípios</h3>
+
+          <!-- Buscador -->
+          <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
+            <input id="buscaMunicipio" type="text" placeholder="🔍  Buscar município..."
+              oninput="filtrarMunicipios()"
+              style="padding:7px 12px;border:1px solid var(--borda);border-radius:6px;font-size:13px;width:260px;outline:none">
+            <span id="countLabel" style="font-size:12px;color:#607080">Exibindo 92 municípios</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px">
+            <!-- Coluna 1 -->
+            <table id="tabMun1">
+              <thead><tr><th>#</th><th>Município</th><th class="num">Cands.</th><th class="pct">%</th></tr></thead>
+              <tbody>
+                <tr data-mun="Afonso Cláudio"><td>1</td><td>Afonso Cláudio</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Água Doce do Norte"><td>2</td><td>Água Doce do Norte</td><td class="num">7</td><td class="pct">1,0%</td></tr>
+                <tr data-mun="Águia Branca"><td>3</td><td>Águia Branca</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="Alegre"><td>4</td><td>Alegre</td><td class="num">8</td><td class="pct">1,1%</td></tr>
+                <tr data-mun="Alfredo Chaves"><td>5</td><td>Alfredo Chaves</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Alto Rio Novo"><td>6</td><td>Alto Rio Novo</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Anchieta"><td>7</td><td>Anchieta</td><td class="num">19</td><td class="pct">2,7%</td></tr>
+                <tr data-mun="Apiacá"><td>8</td><td>Apiacá</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Aracruz"><td>9</td><td>Aracruz</td><td class="num">9</td><td class="pct">1,3%</td></tr>
+                <tr data-mun="Arraial do Cabo"><td>10</td><td>Arraial do Cabo</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Atílio Vivácqua"><td>11</td><td>Atílio Vivácqua</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Baixo Guandu"><td>12</td><td>Baixo Guandu</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Barra de São Francisco"><td>13</td><td>Barra de São Francisco</td><td class="num">8</td><td class="pct">1,1%</td></tr>
+                <tr data-mun="Boa Esperança"><td>14</td><td>Boa Esperança</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Bom Jesus do Itabapoana"><td>15</td><td>Bom Jesus do Itabapoana</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Bom Jesus do Norte"><td>16</td><td>Bom Jesus do Norte</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Brasília/DF"><td>17</td><td>Brasília/DF</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Brejetuba"><td>18</td><td>Brejetuba</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Cachoeiro de Itapemirim"><td>19</td><td>Cachoeiro de Itapemirim</td><td class="num">23</td><td class="pct">3,3%</td></tr>
+                <tr data-mun="Cariacica"><td>20</td><td>Cariacica</td><td class="num">26</td><td class="pct">3,7%</td></tr>
+                <tr data-mun="Castelo"><td>21</td><td>Castelo</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Colatina"><td>22</td><td>Colatina</td><td class="num">16</td><td class="pct">2,3%</td></tr>
+                <tr data-mun="Conceição da Barra"><td>23</td><td>Conceição da Barra</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="Conceição do Castelo"><td>24</td><td>Conceição do Castelo</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Divino de São Lourenço"><td>25</td><td>Divino de São Lourenço</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Domingos Martins"><td>26</td><td>Domingos Martins</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Dores do Rio Preto"><td>27</td><td>Dores do Rio Preto</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Ecoporanga"><td>28</td><td>Ecoporanga</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Espera Feliz"><td>29</td><td>Espera Feliz</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Fundão"><td>30</td><td>Fundão</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Governador Lindenberg"><td>31</td><td>Governador Lindenberg</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="Guaçuí"><td>32</td><td>Guaçuí</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="Guarapari"><td>33</td><td>Guarapari</td><td class="num">27</td><td class="pct">3,8%</td></tr>
+                <tr data-mun="Ibatiba"><td>34</td><td>Ibatiba</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Ibitirama"><td>35</td><td>Ibitirama</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Iconha"><td>36</td><td>Iconha</td><td class="num">8</td><td class="pct">1,1%</td></tr>
+                <tr data-mun="Imperatriz"><td>37</td><td>Imperatriz</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Irupi"><td>38</td><td>Irupi</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Itaguaçu"><td>39</td><td>Itaguaçu</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="Itapemirim"><td>40</td><td>Itapemirim</td><td class="num">14</td><td class="pct">2,0%</td></tr>
+                <tr data-mun="Itarana"><td>41</td><td>Itarana</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Itapevi/SP"><td>42</td><td>Itapevi/SP</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Jaguaré"><td>43</td><td>Jaguaré</td><td class="num">7</td><td class="pct">1,0%</td></tr>
+                <tr data-mun="Jerônimo Monteiro"><td>44</td><td>Jerônimo Monteiro</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="João Neiva"><td>45</td><td>João Neiva</td><td class="num">6</td><td class="pct">0,9%</td></tr>
+                <tr data-mun="Linhares"><td>46</td><td>Linhares</td><td class="num">28</td><td class="pct">4,0%</td></tr>
+              </tbody>
+            </table>
+
+            <!-- Coluna 2 -->
+            <table id="tabMun2">
+              <thead><tr><th>#</th><th>Município</th><th class="num">Cands.</th><th class="pct">%</th></tr></thead>
+              <tbody>
+                <tr data-mun="Maceió/AL"><td>47</td><td>Maceió/AL</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Mantenópolis"><td>48</td><td>Mantenópolis</td><td class="num">7</td><td class="pct">1,0%</td></tr>
+                <tr data-mun="Marechal Floriano"><td>49</td><td>Marechal Floriano</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Marataízes"><td>50</td><td>Marataízes</td><td class="num">17</td><td class="pct">2,4%</td></tr>
+                <tr data-mun="Marilândia"><td>51</td><td>Marilândia</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Mimoso do Sul"><td>52</td><td>Mimoso do Sul</td><td class="num">9</td><td class="pct">1,3%</td></tr>
+                <tr data-mun="Montanha"><td>53</td><td>Montanha</td><td class="num">9</td><td class="pct">1,3%</td></tr>
+                <tr data-mun="Mucurici"><td>54</td><td>Mucurici</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Muniz Freire"><td>55</td><td>Muniz Freire</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Muqui"><td>56</td><td>Muqui</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Mutum/MG"><td>57</td><td>Mutum/MG</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Nova Venécia"><td>58</td><td>Nova Venécia</td><td class="num">12</td><td class="pct">1,7%</td></tr>
+                <tr data-mun="Pancas"><td>59</td><td>Pancas</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Pedro Canário"><td>60</td><td>Pedro Canário</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="Pinheiros"><td>61</td><td>Pinheiros</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Piúma"><td>62</td><td>Piúma</td><td class="num">9</td><td class="pct">1,3%</td></tr>
+                <tr data-mun="Ponto Belo"><td>63</td><td>Ponto Belo</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Porto Alegre"><td>64</td><td>Porto Alegre</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Praia Grande"><td>65</td><td>Praia Grande</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Presidente Kennedy"><td>66</td><td>Presidente Kennedy</td><td class="num">11</td><td class="pct">1,6%</td></tr>
+                <tr data-mun="Rio Bananal"><td>67</td><td>Rio Bananal</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="Santa Leopoldina"><td>68</td><td>Santa Leopoldina</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Santa Maria de Jetibá"><td>69</td><td>Santa Maria de Jetibá</td><td class="num">7</td><td class="pct">1,0%</td></tr>
+                <tr data-mun="Santa Teresa"><td>70</td><td>Santa Teresa</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="São Domingos do Norte"><td>71</td><td>São Domingos do Norte</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="São Gabriel da Palha"><td>72</td><td>São Gabriel da Palha</td><td class="num">3</td><td class="pct">0,4%</td></tr>
+                <tr data-mun="São João do Manteninha"><td>73</td><td>São João do Manteninha</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="São Joaquim de Bicas/MG"><td>74</td><td>São Joaquim de Bicas/MG</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="São José do Calçado"><td>75</td><td>São José do Calçado</td><td class="num">4</td><td class="pct">0,6%</td></tr>
+                <tr data-mun="São Mateus"><td>76</td><td>São Mateus</td><td class="num">20</td><td class="pct">2,8%</td></tr>
+                <tr data-mun="São Paulo/SP"><td>77</td><td>São Paulo/SP</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="São Roque do Canaã"><td>78</td><td>São Roque do Canaã</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Serra"><td>79</td><td>Serra</td><td class="num">54</td><td class="pct">7,7%</td></tr>
+                <tr data-mun="Sítio dos Pinhais"><td>80</td><td>Sítio dos Pinhais</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Sooretama"><td>81</td><td>Sooretama</td><td class="num">5</td><td class="pct">0,7%</td></tr>
+                <tr data-mun="Vargem Alta"><td>82</td><td>Vargem Alta</td><td class="num">8</td><td class="pct">1,1%</td></tr>
+                <tr data-mun="Venda Nova do Imigrante"><td>83</td><td>Venda Nova do Imigrante</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Viana"><td>84</td><td>Viana</td><td class="num">9</td><td class="pct">1,3%</td></tr>
+                <tr data-mun="Vila Pavão"><td>85</td><td>Vila Pavão</td><td class="num">1</td><td class="pct">0,1%</td></tr>
+                <tr data-mun="Vila Valério"><td>86</td><td>Vila Valério</td><td class="num">2</td><td class="pct">0,3%</td></tr>
+                <tr data-mun="Vila Velha"><td>87</td><td>Vila Velha</td><td class="num">75</td><td class="pct">10,7%</td></tr>
+                <tr data-mun="Vitória"><td>88</td><td>Vitória</td><td class="num">82</td><td class="pct">11,7%</td></tr>
+                <tr data-mun="Outros/Não informado"><td>89</td><td>Outros / Não informado</td><td class="num">13</td><td class="pct">1,9%</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p style="font-size:11px;color:#607080;margin-top:12px;background:var(--azul-cl);padding:8px;border-radius:6px">
+            📌 Total de <strong>92 municípios</strong> identificados. Municípios sem UF indicada são presumivelmente do Espírito Santo. 13 candidatos não informaram cidade no cadastro.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ESCOLARIDADE -->
+  <div class="secao">
+    <div class="secao-header"><span class="icon">🎓</span> Nível de Escolaridade</div>
+    <div class="secao-body">
+      <div class="charts-2">
+        <div class="chart-card">
+          <h3>Distribuição por Nível</h3>
+          <div class="chart-container" style="height:240px">
+            <canvas id="chartEsc"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Detalhamento</h3>
+          <table>
+            <thead><tr><th>Nível</th><th class="num">Candidatos</th><th class="pct">%</th><th style="width:140px">Proporção</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Pós-Graduação Lato Sensu</td><td class="num">363</td><td class="pct">51,7%</td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill verde" style="width:100%"></div></div></div></td>
+              </tr>
+              <tr>
+                <td>Superior (Graduação)</td><td class="num">288</td><td class="pct">41,0%</td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill" style="width:79%"></div></div></div></td>
+              </tr>
+              <tr>
+                <td>Mestrado</td><td class="num">33</td><td class="pct">4,7%</td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill laranja" style="width:9%"></div></div></div></td>
+              </tr>
+              <tr>
+                <td>Ensino Médio</td><td class="num">14</td><td class="pct">2,0%</td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill laranja" style="width:4%"></div></div></div></td>
+              </tr>
+              <tr>
+                <td>Doutorado</td><td class="num">4</td><td class="pct">0,6%</td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill laranja" style="width:1%"></div></div></div></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#607080;margin-top:12px;background:var(--azul-cl);padding:8px;border-radius:6px">
+            📌 92,7% dos inscritos possuem formação superior completa (graduação ou mais). Apenas 2,0% declararam ensino médio como maior nível.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. VÍNCULO INSTITUCIONAL -->
+  <div class="secao">
+    <div class="secao-header"><span class="icon">🏛️</span> Vínculo Institucional</div>
+    <div class="secao-body">
+      <div class="charts-2">
+        <div class="chart-card">
+          <h3>Esfera do Vínculo — Candidatos com Vínculo Identificado</h3>
+          <div class="chart-container" style="height:240px">
+            <canvas id="chartVinculo"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Notas sobre o Vínculo</h3>
+          <table>
+            <thead><tr><th>Esfera</th><th class="num">Candidatos</th><th class="pct">% (amostra)</th></tr></thead>
+            <tbody>
+              <tr><td>🏙️ Municipal</td><td class="num">62</td><td class="pct">77,5%</td></tr>
+              <tr><td>🏛️ Estadual</td><td class="num">15</td><td class="pct">18,8%</td></tr>
+              <tr><td>⚖️ TCE-ES</td><td class="num">3</td><td class="pct">3,8%</td></tr>
+              <tr style="background:#EFF4FA"><td><strong>Total identificados</strong></td><td class="num"><strong>80</strong></td><td class="pct">100%</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#607080;margin-top:12px;background:var(--azul-cl);padding:8px;border-radius:6px">
+            📌 Vínculo identificado em <strong>80 de 702 inscritos</strong> (11,4%), com base na análise documental. Os 622 demais não tiveram vínculo declarado no formulário de inscrição.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. DISTRIBUIÇÃO DE PONTUAÇÃO -->
+  <div class="secao">
+    <div class="secao-header"><span class="icon">📊</span> Distribuição de Pontuação — Fase 1 (Quadro 3)</div>
+    <div class="secao-body">
+      <div class="charts-2">
+        <div class="chart-card">
+          <h3>Histograma de Pontuação Total</h3>
+          <div class="chart-container" style="height:250px">
+            <canvas id="chartPts"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Indicadores de Pontuação</h3>
+          <table>
+            <thead><tr><th>Indicador</th><th class="num">Valor</th></tr></thead>
+            <tbody>
+              <tr><td>Pontuação máxima</td><td class="num">69 pts</td></tr>
+              <tr><td>Pontuação mínima</td><td class="num">9 pts</td></tr>
+              <tr><td>Média geral</td><td class="num">28,9 pts</td></tr>
+              <tr><td>Candidatos com 30+ pts</td><td class="num">259 (36,9%)</td></tr>
+              <tr><td>Candidatos com 20–29 pts</td><td class="num">300 (42,7%)</td></tr>
+              <tr><td>Candidatos com &lt; 20 pts</td><td class="num">143 (20,4%)</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#607080;margin-top:12px;background:var(--azul-cl);padding:8px;border-radius:6px">
+            📌 A pontuação total combina <strong>Pontos por Título</strong> (formação acadêmica) + <strong>Pontos por Experiência</strong> (exp. profissional e liderança), conforme Quadro 3 do Edital. Pontuação mínima para classificação na 1ª fase: <strong>18 pontos</strong>.
+          </p>
+        </div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="chart-card">
+          <h3>Pontuação por Título vs. Pontuação por Experiência</h3>
+          <div class="chart-container" style="height:260px">
+            <canvas id="chartPtsComp"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CLASSIFICADOS PARA A 2ª FASE -->
+  <div class="secao">
+    <div class="secao-header" style="background:#1A6B3A"><span class="icon">✅</span> Classificados para a 2ª Fase — Resultado Final da 1ª Fase</div>
+    <div class="secao-body">
+
+      <!-- Mini-badges da 2ª fase -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px">
+        <div class="badge" style="border-color:#1A6B3A">
+          <div class="badge-num" style="color:#1A6B3A">117</div>
+          <div class="badge-label">Total Classificados</div>
+        </div>
+        <div class="badge">
+          <div class="badge-num">102</div>
+          <div class="badge-label">Ampla Concorrência</div>
+        </div>
+        <div class="badge" style="border-color:#1A6B3A">
+          <div class="badge-num" style="color:#1A6B3A">14</div>
+          <div class="badge-label">Cotas Raciais</div>
+        </div>
+        <div class="badge" style="border-color:#B45E00">
+          <div class="badge-num" style="color:#B45E00">1</div>
+          <div class="badge-label">PCD</div>
+        </div>
+        <div class="badge">
+          <div class="badge-num">94</div>
+          <div class="badge-label">G1 — Municipal</div>
+        </div>
+        <div class="badge">
+          <div class="badge-num">18</div>
+          <div class="badge-label">G2 — Estadual</div>
+        </div>
+        <div class="badge" style="border-color:#5B2D8E">
+          <div class="badge-num" style="color:#5B2D8E">5</div>
+          <div class="badge-label">G3 — TCE-ES</div>
+        </div>
+      </div>
+
+      <div class="charts-2">
+        <div class="chart-card">
+          <h3>Classificados por Modalidade de Cota</h3>
+          <div class="chart-container" style="height:240px">
+            <canvas id="chartFase2Cota"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Classificados por Grupo de Vínculo</h3>
+          <div class="chart-container" style="height:240px">
+            <canvas id="chartFase2Grupo"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="chart-card">
+          <h3>Detalhamento por Grupo e Modalidade</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Grupo</th>
+                <th class="num">Ampla Conc.</th>
+                <th class="num">Cotas Raciais</th>
+                <th class="num">PCD</th>
+                <th class="num">Total</th>
+                <th style="width:180px">Proporção</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>🏙️ G1 — Servidores Municipais</td>
+                <td class="num">84</td><td class="num">9</td><td class="num">1</td>
+                <td class="num"><strong>94</strong></td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill verde" style="width:80%"></div></div><span style="font-size:11px;color:#607080">80,3%</span></div></td>
+              </tr>
+              <tr>
+                <td>🏛️ G2 — Servidores Estaduais</td>
+                <td class="num">13</td><td class="num">5</td><td class="num">—</td>
+                <td class="num"><strong>18</strong></td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill" style="width:15%"></div></div><span style="font-size:11px;color:#607080">15,4%</span></div></td>
+              </tr>
+              <tr>
+                <td>⚖️ G3 — Servidores do TCE-ES</td>
+                <td class="num">5</td><td class="num">—</td><td class="num">—</td>
+                <td class="num"><strong>5</strong></td>
+                <td><div class="barra-wrap"><div class="barra"><div class="barra-fill laranja" style="width:4%"></div></div><span style="font-size:11px;color:#607080">4,3%</span></div></td>
+              </tr>
+              <tr style="background:#EFF4FA">
+                <td><strong>Total</strong></td>
+                <td class="num"><strong>102</strong></td>
+                <td class="num"><strong>14</strong></td>
+                <td class="num"><strong>1</strong></td>
+                <td class="num"><strong>117</strong></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:11px;color:#607080;margin-top:12px;background:#C6EFCE;padding:8px;border-radius:6px">
+            📌 <strong>117 candidatos</strong> classificados para a 2ª Fase de um total de 702 inscritos (16,7%). Cotas Raciais: G1 com 9 candidatos (8 vagas) e G2 com 5 candidatos (2 vagas) — todos avançam para a 2ª Fase conforme o edital. PCD: 1 candidata classificada sem laudo médico enviado (avaliação pericial na 2ª Fase).
+          </p>
+          <div style="margin-top:14px;background:#FFF8E1;border-left:3px solid #F9A825;padding:10px 14px;border-radius:4px;font-size:11.5px;color:#5D4037">
+            <strong>⚠️ Observações:</strong><br>
+            • <strong>Eduardo Rangel Zanotti Barcellos</strong> (G2 / Ampla, pos. 185): classificado com ressalva — tipo de vínculo (comissionado) requer verificação de regularidade.<br>
+            • <strong>Juliana Dalmagro</strong> (G1 / Ampla, pos. 217) e <strong>Vanessa Marques Ribeiro</strong> (G1 / Ampla, pos. 238): pontos finais não informados no documento fonte.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer>
+  Tribunal de Contas do Estado do Espírito Santo — ECP · Processo Seletivo Simplificado Nº 00001/2026 · Atualizado em 01/04/2026 · Uso interno
+</footer>
+
+<script>
+// ── Paleta de cores ────────────────────────────────────────────────────────
+const AZUL   = '#003366';
+const AZUL_M = '#1A4D8C';
+const AZUL_L = '#4A80C4';
+const AZUL_P = '#89B4E0';
+const VERDE  = '#1A6B3A';
+const VERM   = '#8B0000';
+const LARAN  = '#C86A00';
+const AMAR   = '#B8860B';
+const ROXO   = '#5B2D8E';
+const CINZA  = '#78909C';
+
+Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+Chart.defaults.font.size = 12;
+
+// ── 1. COTA ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartCota'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Ampla Concorrência', 'Cota Racial', 'PCD', 'Racial + PCD'],
+    datasets: [{
+      data: [570, 115, 14, 3],
+      backgroundColor: [AZUL, VERDE, LARAN, ROXO],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.raw} (${(ctx.raw/702*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ── 2. SEXO ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartSexo'), {
+  type: 'pie',
+  data: {
+    labels: ['Feminino', 'Masculino'],
+    datasets: [{
+      data: [412, 290],
+      backgroundColor: [AZUL_L, AZUL],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.raw} (${(ctx.raw/702*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ── 3. FAIXA ETÁRIA ────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartIdade'), {
+  type: 'bar',
+  data: {
+    labels: ['Até 29', '30–39', '40–49', '50–59', '60+'],
+    datasets: [{
+      label: 'Candidatos',
+      data: [84, 256, 242, 94, 26],
+      backgroundColor: [AZUL_P, AZUL_L, AZUL_M, AZUL, VERM],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#EEF2F6' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── 4. ESTADO CIVIL ────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartEstCivil'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Casado(a)', 'Solteiro(a)', 'Divorciado(a)', 'União Estável', 'Outros'],
+    datasets: [{
+      data: [344, 258, 53, 29, 18],
+      backgroundColor: [AZUL, AZUL_L, LARAN, VERDE, CINZA],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 8, font: { size: 10 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.raw} (${(ctx.raw/702*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ── 5. CIDADES (Top 15) ────────────────────────────────────────────────────
+// Merge "Vitória" + "Vitoria"
+new Chart(document.getElementById('chartCidades'), {
+  type: 'bar',
+  data: {
+    labels: ['Vila Velha','Vitória','Serra','Linhares','Guarapari','Cariacica',
+             'Cachoeiro Itapemirim','São Mateus','Anchieta','Colatina',
+             'Marataízes','Itapemirim','Pres. Kennedy','Mimoso do Sul','Outros'],
+    datasets: [{
+      label: 'Candidatos',
+      data: [75, 81, 53, 28, 27, 26, 20, 19, 19, 16, 14, 14, 11, 9, 290],
+      backgroundColor: (ctx) => ctx.dataIndex < 14 ? AZUL_M : CINZA,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.raw} candidatos (${(ctx.raw/702*100).toFixed(1)}%)`
+        }
+      }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: '#EEF2F6' } },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ── 6. ESCOLARIDADE ────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartEsc'), {
+  type: 'bar',
+  data: {
+    labels: ['Pós-Grad. Lato Sensu','Superior','Mestrado','Ensino Médio','Doutorado'],
+    datasets: [{
+      label: 'Candidatos',
+      data: [363, 288, 33, 14, 4],
+      backgroundColor: [VERDE, AZUL_M, LARAN, VERM, ROXO],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#EEF2F6' } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ── 7. VÍNCULO ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('chartVinculo'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Municipal', 'Estadual', 'TCE-ES'],
+    datasets: [{
+      data: [62, 15, 3],
+      backgroundColor: [AZUL, VERDE, ROXO, CINZA],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.raw} (${(ctx.raw/80*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ── 8. PONTUAÇÃO TOTAL (histograma) ────────────────────────────────────────
+new Chart(document.getElementById('chartPts'), {
+  type: 'bar',
+  data: {
+    labels: ['9–19 pts\n(abaixo do mín.)', '20–29 pts', '30–39 pts', '40–49 pts', '50–59 pts', '60+ pts'],
+    datasets: [{
+      label: 'Candidatos',
+      data: [129, 300, 209, 49, 14, 1],
+      backgroundColor: [VERM, AZUL_L, AZUL_M, VERDE, LARAN, ROXO],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.raw} candidatos (${(ctx.raw/702*100).toFixed(1)}%)`
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#EEF2F6' } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ── 9. PTS TÍTULO vs EXPERIÊNCIA ────────────────────────────────────────────
+new Chart(document.getElementById('chartPtsComp'), {
+  type: 'bar',
+  data: {
+    labels: ['0–9', '10–14', '15–19', '20–24', '25–29', '30+'],
+    datasets: [
+      {
+        label: 'Pontos por Título',
+        data: [0, 0, 14, 0, 0, 688],  // 688 têm 19+ (todos declararam algum grau)
+        backgroundColor: AZUL_L,
+        borderRadius: 4
+      },
+      {
+        label: 'Pontos por Experiência',
+        data: [129, 0, 0, 180, 240, 153],
+        backgroundColor: VERDE,
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', labels: { font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} candidatos`
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#EEF2F6' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── Busca de municípios ────────────────────────────────────────────────────
+function filtrarMunicipios() {
+  const q = document.getElementById('buscaMunicipio').value.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let count = 0;
+  ['tabMun1','tabMun2'].forEach(id => {
+    document.querySelectorAll('#' + id + ' tbody tr').forEach(tr => {
+      const mun = (tr.dataset.mun || '').toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const show = !q || mun.includes(q);
+      tr.style.display = show ? '' : 'none';
+      if (show) count++;
+    });
+  });
+  document.getElementById('countLabel').textContent =
+    q ? `Exibindo ${count} município${count !== 1 ? 's' : ''}` : 'Exibindo 92 municípios';
+}
+
+// ── 9. FASE 2 — POR COTA ──────────────────────────────────────────────────
+new Chart(document.getElementById('chartFase2Cota'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Ampla Concorrência', 'Cotas Raciais', 'PCD'],
+    datasets: [{
+      data: [102, 14, 1],
+      backgroundColor: [AZUL, VERDE, LARAN],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.raw} (${(ctx.raw/117*100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ── 10. FASE 2 — POR GRUPO ────────────────────────────────────────────────
+new Chart(document.getElementById('chartFase2Grupo'), {
+  type: 'bar',
+  data: {
+    labels: ['G1 — Municipal', 'G2 — Estadual', 'G3 — TCE-ES'],
+    datasets: [
+      {
+        label: 'Ampla Concorrência',
+        data: [84, 13, 5],
+        backgroundColor: AZUL_M,
+        borderRadius: 4
+      },
+      {
+        label: 'Cotas Raciais',
+        data: [9, 5, 0],
+        backgroundColor: VERDE,
+        borderRadius: 4
+      },
+      {
+        label: 'PCD',
+        data: [1, 0, 0],
+        backgroundColor: LARAN,
+        borderRadius: 4
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}`
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, beginAtZero: true, grid: { color: '#EEF2F6' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
